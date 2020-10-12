@@ -20,9 +20,12 @@
     "webpack-cli": "^3.3.12"
   },
   "scripts": {
+    "build-dev": "WATCH='-w' npm run build",
     "build": "npm run build-js & npm run build-static",
-    "build-js": "webpack -w",
-    "build-static": "cpx 'src/**/*.{html,svg}' dist -w & cpx 'src/manifest.json' dist -w & cpx 'src/test.js' dist -w",
-    "start": "npm build && web-ext run"
+    "build-js": "webpack ${WATCH}",
+    "build-static": "npm run build-static-base & npm run build-static-chrome",
+    "build-static-base": "cpx 'src/manifest.json' dist ${WATCH}",
+    "build-static-chrome": "cpx 'src/chrome/**/*.{html,svg}' dist ${WATCH}",
+    "start": "web-ext run"
   }
 }

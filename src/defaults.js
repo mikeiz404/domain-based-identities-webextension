@@ -10,3 +10,5 @@ export const GROUPS_DEFAULT = [
         defaultIdentityId: 'firefox-container-1'
     }
 ]
+
+export const DOUBLECLICK_DURATION_DEFAULT = 300

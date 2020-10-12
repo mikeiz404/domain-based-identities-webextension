@@ -1,6 +1,6 @@
 import {TabDataService} from './tab_data_service.js'
 import * as Actions from './actions.js'
-import {GROUPS_DEFAULT} from 'defaults.js'
+import {GROUPS_DEFAULT, DOUBLECLICK_DURATION_DEFAULT} from 'defaults.js'
 
 
 async function init( )
@@ -134,8 +134,6 @@ async function init( )
 }
 
 // set up double click handling
-const DOUBLECLICK_DURATION_MAX = 300
-
 function addDoubleClickListener( callback )
 {
     browser.runtime.onConnect.addListener(( port ) =>
@@ -147,7 +145,7 @@ function addDoubleClickListener( callback )
             const end = Date.now()
             const duration = end - start
 
-            if( duration < DOUBLECLICK_DURATION_MAX ) callback()
+            if( duration < DOUBLECLICK_DURATION_DEFAULT ) callback()
             port.onDisconnect.removeListener(this)
         })
     })
