@@ -1,3 +1,5 @@
+import { Group } from './models.js'
+
 class PageActionController
 {
     constructor( port )
@@ -5,6 +7,7 @@ class PageActionController
         this.port = port
         this.state =
         {
+            tabId: -1,
             groups: []
         }
         this.listeners = []
@@ -13,11 +16,13 @@ class PageActionController
         {
             port.onMessage.addListener(( _message ) =>
             {    
+                console.info('PA: PAC: port.onMessage ', _message)
                 if( _message.onConnectEvent )
-                {   
+                {
                     const message = _message.onConnectEvent
-                    const groups = message.currentTabData.groups
-                    this.updateState({groups})
+                    const groups = message.currentTabData.groups.map(Group.fromObject)
+
+                    this.updateState({tabId: message.tabId, groups})
                     
                     this.dataLoaded = true
                     resolve()
@@ -29,6 +34,8 @@ class PageActionController
 
     updateState( state )
     {
+        console.info('PA: PAC: updateState', {state})
+
         // merge values
         this.state = {...this.state, ...state}
 

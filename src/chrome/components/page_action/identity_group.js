@@ -64,7 +64,7 @@ class IdentityGroup extends LitElement
                     ${this.value.identities.map(( identity ) => html`
                         <identity-el
                             .value=${identity}
-                            .isDefault=${identity.cookieStoreId === this.value.defaultContextId}
+                            .isDefault=${identity === this.value.defaultIdentity}
                             .isActive=${false /*c.cookieStoreId === currentTab.cookieStoreId*/}>
                         </identity-el>`)}
                 </ul>

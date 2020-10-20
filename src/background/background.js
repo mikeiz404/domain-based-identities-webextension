@@ -1,11 +1,13 @@
 import {TabDataService} from './tab_data_service.js'
 import * as Actions from './actions.js'
-import {GROUPS_DEFAULT, DOUBLECLICK_DURATION_DEFAULT} from 'defaults.js'
-
+import {GROUPS_DEFAULT, DOUBLECLICK_DURATION_DEFAULT} from './defaults.js'
+import { BackgroundToChrome } from './model_converters.js'
 
 async function init( )
 {
     console.info('BK: Init')
+
+    // todo: store Group.counter, Identity.counter, and Pattern.counter in DB
 
     const tds = new TabDataService()
 
@@ -58,7 +60,7 @@ async function init( )
                     currentTabData:
                     {
                         tabId: tabData.tabId,
-                        groups: tabData.groups
+                        groups: tabData.groups.map(BackgroundToChrome.fromGroup)
                     }
                 }
             }
@@ -124,7 +126,7 @@ async function init( )
 
         if( reason === 'install')
         {
-            console.log('BK: Clearing and loading default data.')
+            console.log('BK: Clearing and loading default data.', {GROUPS_DEFAULT})
         
             await browser.storage.sync.clear()
             browser.storage.sync.set({groups: GROUPS_DEFAULT})

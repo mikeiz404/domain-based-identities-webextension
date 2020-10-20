@@ -6,7 +6,7 @@ module.exports =
         modules:
         [
             'node_modules',
-            './'
+            './src/'
         ]
     },
     devtool: 'source-map',

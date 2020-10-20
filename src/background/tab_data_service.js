@@ -1,10 +1,5 @@
 import EventHandler from './event_handler.js'
-
-function isMatch( group, url )
-{
-    const hostname = (new URL(url)).hostname
-    return group.patterns.reduce((found, pattern) => found || hostname === pattern, false)
-}
+import {Group, Identity, Pattern} from './models.js'
 
 class TabDataService
 {
@@ -12,16 +7,20 @@ class TabDataService
     {
         this.onTabUpdate = new EventHandler()
         this.currentTab = null
-        this.identities = new Map()
+        this.identities = new Map() // cookieStoreId: contextualIdentity
         this.groups = []
         this.tabGroups = new Map() // tabId: group
-        this.tabCommittedUrls = new Map()
+        this.tabCommittedUrls = new Map() // tabId: url
+
+        // inject
+        Identity.identityMap = this.identities
 
         // load groups
         let groupsPromise = browser.storage.sync.get('groups').then(( data ) =>
         {
             console.info('BK: TDS: browser.storage.sync.get(\'groups\')', {data})
-            this.groups = data.groups || []
+
+            this.groups = (data.groups || []).map(Group.fromObject)
         })
 
         // handle group updates
@@ -38,7 +37,6 @@ class TabDataService
         // ... identities
         let identitiesPromise = browser.contextualIdentities.query({})
         .then(( identities ) =>
-            // note: this.identities will be empty when this is called so no need to clear it
             Object.keys(identities).forEach(( key ) =>
             {
                 const identity = identities[key]
@@ -51,9 +49,12 @@ class TabDataService
 
         // ... tab urls
         let tabsPromise = browser.tabs.query({})
-        this.initPromise = Promise.all([tabsPromise, currentTabPromise, groupsPromise, identitiesPromise]).then(async ( [tabs] ) =>
+        this.initPromise = Promise.all([tabsPromise, groupsPromise, identitiesPromise, currentTabPromise]).then(async ( [tabs, groups] ) =>
         {
             tabs.forEach(( tab ) => this._updateTab(tab.id, tab.url))
+
+            // todo: delete missing identities
+            this.groups.map(Group.fromObject)
         })
 
         // watch
@@ -72,6 +73,8 @@ class TabDataService
         {
             console.info('BK: TDS: contextualIdentities.onRemoved', {identity})
             this.identities.delete(identity.cookieStoreId)
+
+            // todo: remove references to this identity from all Groups
         })
 
         // ... last active tab in current window
@@ -110,7 +113,7 @@ class TabDataService
     _updateTab( tabId, url )
     {
         console.info('BK: TDS: _updateTab', {tabId, url})
-        // this.tabGroups.set(tabId, this.groups.filter(( group ) => isMatch(group, url)))
+        // this.tabGroups.set(tabId, this.groups.filter(( group ) => group.isMatch(url)))
         this.tabGroups.set(tabId, this.groups)
         this.tabCommittedUrls.set(tabId, url)
 
@@ -123,11 +126,7 @@ class TabDataService
         return ({
             tabId: tabId,
             committedUrl: this.tabCommittedUrls.get(tabId),
-            groups: this.tabGroups.get(tabId).map(( group ) =>
-            ({
-                ...group,
-                identities: group.identityIds.map(( id ) => this.identities.get(id))
-            }))
+            groups: this.tabGroups.get(tabId)
         })
     }
 

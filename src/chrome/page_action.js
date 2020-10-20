@@ -5,7 +5,7 @@ import {IDENTITY_HEIGHT_ESTIMATE_PX, HEADER_HEIGHT_PX, FOOTER_HEIGHT_PX} from 'c
 
 function estimatePageHeight( groups )
 {
-    const identitiesHeight = groups.reduce(( sum, group ) => sum + (group.identityIds.length * IDENTITY_HEIGHT_ESTIMATE_PX), 0)
+    const identitiesHeight = groups.reduce(( sum, group ) => sum + (group.identities.length * IDENTITY_HEIGHT_ESTIMATE_PX), 0)
     const pageHeight = HEADER_HEIGHT_PX + FOOTER_HEIGHT_PX + identitiesHeight
 
     return pageHeight

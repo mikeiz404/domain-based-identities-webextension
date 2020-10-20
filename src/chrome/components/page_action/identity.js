@@ -106,7 +106,7 @@ class Identity extends LitElement
         return html`
             <div class="container" @click=${this.openInIdentity} style=${styleMap(styles)}>
                 <div class="icon"></div>
-                <div class="name">${this.value.name}</div>
+                <div class="name">${this.value.displayName}</div>
                 ${this.isDefault ? html`<div class="isDefault">DEFAULT</div>` : html``}
             </div>
         `
